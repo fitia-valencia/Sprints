@@ -1,9 +1,0 @@
-services:
-  tomcat:
-    build: .
-    container_name: giga-tomcat
-    ports:
-      - "8080:8080"
-    volumes:
-      - ./target/gigaspring-lab.war:/usr/local/tomcat/webapps/gigaspring-lab.war
-    restart: no
