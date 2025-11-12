@@ -1,5 +1,6 @@
 com\monframework\core\RouteManager.class
 com\monframework\scanner\SimpleRouteScanner.class
+com\monframework\core\ModelView.class
 com\monframework\MyClass.class
 com\monframework\annotation\Component.class
 com\monframework\annotation\MyAnnotation.class
