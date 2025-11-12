@@ -5,8 +5,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-@Target(ElementType.METHOD)
+@Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Route {
-    String value();  // ← Doit être value() pas url()
+public @interface Controller {
+    String value() default ""; // Préfixe d'URL pour le contrôleur
 }
