@@ -1,25 +1,23 @@
 package com.testapp;
 
-import com.monframework.scanner.SimpleRouteScanner;
-import com.monframework.annotation.Route;
-import java.lang.reflect.Method;
-import java.util.Set;
+import com.monframework.core.RouteManager;
 
 public class TestMain {
     public static void main(String[] args) {
         try {
-            Set<Method> methods = SimpleRouteScanner.findAnnotatedMethods("com.testapp");
+            RouteManager routeManager = new RouteManager();
             
-            System.out.println("URLs discovered:");
-            for (Method method : methods) {
-                Route route = method.getAnnotation(Route.class);
-                System.out.println("URL: " + route.url() + " -> Method: " + method.getName());
-                
-                // Exécuter la méthode pour tester
-                Object instance = method.getDeclaringClass().newInstance();
-                method.invoke(instance);
-                System.out.println("---");
-            }
+            System.out.println("=== Scanning des contrôleurs ===");
+            routeManager.scanControllers("com.testapp");
+            
+            routeManager.listAllRoutes();
+            
+            System.out.println("\n=== Tests d'exécution ===");
+            routeManager.executeRoute("/api/users");
+            routeManager.executeRoute("/api/products");
+            routeManager.executeRoute("/admin/dashboard");
+            routeManager.executeRoute("/api/unknown");
+            routeManager.executeRoute("/invalid");
             
         } catch (Exception e) {
             e.printStackTrace();
