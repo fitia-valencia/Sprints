@@ -3,6 +3,8 @@ package com.monframework.core;
 import com.monframework.annotation.Controller;
 import com.monframework.annotation.Component;
 import com.monframework.annotation.Route;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
@@ -13,7 +15,6 @@ public class ApplicationContext {
     private Map<String, Method> routes = new HashMap<>();
     private static ApplicationContext instance;
     
-    // Ajouter 'throws Exception' à la méthode init
     public static ApplicationContext init(String basePackage) throws Exception {
         instance = new ApplicationContext();
         instance.scanAndInitialize(basePackage);
@@ -26,7 +27,6 @@ public class ApplicationContext {
         
         Set<Class<?>> classes = ClassScanner.findAllClasses(basePackage);
         
-        // Scanner les composants
         for (Class<?> clazz : classes) {
             if (clazz.isAnnotationPresent(Component.class) || 
                 clazz.isAnnotationPresent(Controller.class)) {
@@ -37,7 +37,6 @@ public class ApplicationContext {
                 
                 System.out.println("✓ Composant chargé: " + clazz.getSimpleName());
                 
-                // Si c'est un contrôleur, scanner ses routes
                 if (clazz.isAnnotationPresent(Controller.class)) {
                     scanControllerRoutes(clazz, instance);
                 }
@@ -59,9 +58,57 @@ public class ApplicationContext {
                 String fullUrl = baseUrl + routeAnnotation.value();
                 routes.put(fullUrl, method);
                 
-                System.out.println("  → Route mappée: " + fullUrl + " -> " + method.getName());
+                System.out.println("  → Route mappée: " + fullUrl + " -> " + method.getName() + 
+                                 " (retour: " + method.getReturnType().getSimpleName() + ")");
             }
         }
+    }
+    
+    public void executeRoute(String url) throws Exception {
+        Method method = routes.get(url);
+        if (method == null) {
+            System.out.println("404 - URL non trouvée: " + url);
+            return;
+        }
+        
+        Object controller = beans.get(method.getDeclaringClass().getSimpleName());
+        
+        // Utiliser PrintWriter pour l'affichage formaté
+        StringWriter stringWriter = new StringWriter();
+        PrintWriter printWriter = new PrintWriter(stringWriter);
+        
+        printWriter.println("=== EXÉCUTION DE LA ROUTE: " + url + " ===");
+        printWriter.println("Méthode: " + method.getName());
+        printWriter.println("Type de retour: " + method.getReturnType().getSimpleName());
+        
+        // Exécuter la méthode et récupérer le résultat
+        Object result = method.invoke(controller);
+        
+        printWriter.println("Résultat de l'exécution:");
+        
+        if (method.getReturnType() == void.class) {
+            printWriter.println("✓ Méthode exécutée (void)");
+        } else if (result instanceof String) {
+            printWriter.println("✓ Retour String: \"" + result + "\"");
+        } else if (result != null) {
+            printWriter.println("✓ Retour: " + result.toString() + " (" + result.getClass().getSimpleName() + ")");
+        } else {
+            printWriter.println("✓ Retour: null");
+        }
+        
+        // Afficher le résultat formaté
+        System.out.println(stringWriter.toString());
+    }
+    
+    // Nouvelle méthode pour exécuter et retourner le résultat
+    public Object executeAndReturn(String url) throws Exception {
+        Method method = routes.get(url);
+        if (method == null) {
+            throw new RuntimeException("Route non trouvée: " + url);
+        }
+        
+        Object controller = beans.get(method.getDeclaringClass().getSimpleName());
+        return method.invoke(controller);
     }
     
     private String getBeanName(Class<?> clazz) {
@@ -85,20 +132,10 @@ public class ApplicationContext {
     public void listAllRoutes() {
         System.out.println("\n=== ROUTES DISPONIBLES ===");
         for (String url : routes.keySet()) {
-            System.out.println("• " + url + " -> " + routes.get(url).getName());
+            Method method = routes.get(url);
+            System.out.println("• " + url + " -> " + method.getName() + 
+                             " (" + method.getReturnType().getSimpleName() + ")");
         }
-    }
-    
-    public void executeRoute(String url) throws Exception {
-        Method method = routes.get(url);
-        if (method == null) {
-            System.out.println("404 - URL non trouvée: " + url);
-            return;
-        }
-        
-        Object controller = beans.get(method.getDeclaringClass().getSimpleName());
-        method.invoke(controller);
-        System.out.println("✓ Méthode exécutée: " + method.getName());
     }
     
     public static ApplicationContext getInstance() {
