@@ -5,12 +5,9 @@ mvn clean install
 # 2. COPIER le nouveau JAR
 copy target\spring-like-framework-1.0.0.jar ..\test-project\libs\
 
-# 3. Dans test-project - SUPPRIMER l'ancien SimpleScanner
-del src\main\java\com\testapp\SimpleScanner.java
-
-# 4. COMPILER
+# 3. COMPILER
 cd ../test-project
 javac -cp "libs\*" -d target\classes src\main\java\com\testapp\*.java
 
-# 5. EXÉCUTER
+# 4. EXÉCUTER
 java -cp "target\classes;libs\*" com.testapp.TestMain

@@ -1,23 +1,19 @@
 package com.testapp;
 
-import com.monframework.core.RouteManager;
+import com.monframework.core.ApplicationContext;
 
 public class TestMain {
     public static void main(String[] args) {
         try {
-            RouteManager routeManager = new RouteManager();
+            // Initialisation automatique au démarrage
+            ApplicationContext context = ApplicationContext.init("com.testapp");
             
-            System.out.println("=== Scanning des contrôleurs ===");
-            routeManager.scanControllers("com.testapp");
+            System.out.println("\n=== TESTS D'EXÉCUTION ===");
             
-            routeManager.listAllRoutes();
-            
-            System.out.println("\n=== Tests d'exécution ===");
-            routeManager.executeRoute("/api/users");
-            routeManager.executeRoute("/api/products");
-            routeManager.executeRoute("/admin/dashboard");
-            routeManager.executeRoute("/api/unknown");
-            routeManager.executeRoute("/invalid");
+            // Tester quelques routes
+            context.executeRoute("/api/users");
+            context.executeRoute("/admin/dashboard");
+            context.executeRoute("/api/unknown");
             
         } catch (Exception e) {
             e.printStackTrace();
